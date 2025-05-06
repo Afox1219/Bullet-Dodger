@@ -56,7 +56,7 @@ private:
 	float gravity = 100.0f;
 	bool jumping = false;
 	bool crouching = false;
-	float jumpstrength = -100.0f;
+	float jumpstrength = -175.0f;
 	sf::Vector2f velocity;
 	
 
@@ -96,13 +96,12 @@ public:
 	}
 	void applyGravity(float deltaTime) {
 		velocity.y += gravity * deltaTime;
-		shape.move(0, (velocity.y * 3) * deltaTime);
+		shape.move(0, (velocity.y) * deltaTime);
 
 	}
 	void Collision(const sf::RectangleShape& Ground) {
-		// basic ground collision
 		if (shape.getGlobalBounds().intersects(Ground.getGlobalBounds())) {
-			shape.setPosition(shape.getPosition().x, Ground.getPosition().y - shape.getSize().y);
+			shape.setPosition(shape.getPosition().x, Ground.getPosition().y - shape.getSize().y );
 			velocity.y = 0;
 			jumping = false;
 		}
@@ -278,7 +277,7 @@ int main() {
 
 	std::vector <Bullet> bullets;
 	std::vector <Floor> Platforms;
-	Player Hero(1500 / 2, 400);
+	Player Hero(1500 / 2, 710);
 	Floor floor(0, 760);
 
 	Platforms.push_back(Floor(100, 600));
@@ -322,7 +321,6 @@ int main() {
 				TitleScreen(font, window, mouseWorldPos, state, Play);
 				break;
 			case Game:
-				std::cout << "Drawing player at: " << Hero.shape.getPosition().x << ", " << Hero.shape.getPosition().y << std::endl;
 				Levelloop(window, Hero, floor, bullets, Time, Level, Health, Platforms, clock, bulletClock, Gametime, TimeofLevel, Speed_diff, Levels);
 				break;
 			default:
@@ -421,6 +419,9 @@ void Levelloop(sf::RenderWindow& window, Player& Hero, Floor& floor, std::vector
 		bulletClock.restart();
 	}
 
+	if (Hero.shape.getPosition().y > 1000) {
+		Hero.setPosition(Hero.shape.getPosition().x, 710);
+	}
 
 	Hero.move(dt);
 	Hero.Death();
