@@ -148,23 +148,57 @@ private:
 	bool jumping = false;
 	bool crouching = false;
 	float jumpstrength = -100.0f;
-	sf::Vector2f velocity;
-	
+	sf::Clock animClock;
 
+	sf::Vector2f velocity;
+	sf::Sprite PlayerSprite;
+	sf::Texture PlayerTexture;
+	std::vector<sf::Texture> idleTextures;
+
+	int frameWidth = 32;
+	int frameHeight = 32;
+	int currentFrame = 0;
+	int totalFrames = 4;
+	float animationTimer = 0.0f;
+	float animationSpeed = 0.1f;
 public:
 	float health = 10;
 	sf::RectangleShape shape;
 	string name;
 	bool Alive = true;
+	
 	Player(float x, float y){
+		
 		shape.setSize(sf::Vector2f(50.f, 50.0f));
-		shape.setFillColor(sf::Color::Blue);
 		shape.setPosition(x, y);
 		shape.getPosition();
+		PlayerSprite.setTexture(PlayerTexture);
 
+		int totalFrames = 2;
+		for (int i = 0; i <= totalFrames; ++i) {
+			sf::Texture texture;
+			if (!texture.loadFromFile("Anims/Individual Sprites/adventurer-idle-0" + std::to_string(i) + ".png")) {
+				std::cerr << "Failed to load player-idle" << i << ".png\n";
+			}
+			else {
+				idleTextures.push_back(texture);
+			}
+		}
+
+		PlayerSprite.setTexture(idleTextures[0]);
+		PlayerSprite.setScale(1.5f, 1.5f);
+		PlayerSprite.setPosition(x, y);
 
 	}
 	void update(float dt) {
+		animationTimer += animClock.restart().asSeconds();
+		if (animationTimer >= animationSpeed) {
+			animationTimer = 0.0f;
+			currentFrame = (currentFrame + 1) % idleTextures.size();
+			PlayerSprite.setTexture(idleTextures[currentFrame]);
+		}
+
+		PlayerSprite.setPosition(shape.getPosition());
 		sf::FloatRect playerbounds = shape.getGlobalBounds();
 	}
 	void display() const {
@@ -235,6 +269,9 @@ public:
 	}
 	void setPosition(float x,float y) {
 		return shape.setPosition(x, y);
+	}
+	const sf::Sprite& getSprite() const {
+		return PlayerSprite;
 	}
 	void updatespeed() {
 		vspeed += 10;
@@ -616,7 +653,7 @@ void Levelloop(sf::RenderWindow& window, Player& Hero, Floor& floor, std::vector
 		window.draw(plat.shape);
 	}
 	window.draw(floor.shape);
-	window.draw(Hero.shape);
+	
 	window.draw(Health);
 
 	for (auto& b : bullets) {
@@ -625,6 +662,7 @@ void Levelloop(sf::RenderWindow& window, Player& Hero, Floor& floor, std::vector
 	}
 	window.draw(Time);
 	window.draw(Level);
+	window.draw(Hero.getSprite());
 }
 void MenuScreen(sf::Font& font, sf::RenderWindow& window, sf::Vector2f mouseWorldPos, GameState& state, Settings& Sets) {
 	
